@@ -1,4 +1,4 @@
-import { Button, Box, Text } from "@chakra-ui/react";
+import { Button, Box, Text, UnorderedList, ListItem } from "@chakra-ui/react";
 import Identicon from "./Identicon";
 import { useState } from "react";
 declare const window: any;
@@ -10,12 +10,14 @@ type Props = {
 export default function ConnectButton({ handleOpenModal }: Props) {
   const [currentPrincipalId, setCurrentPrincipalId] = useState("");
   const [actor, setActor] = useState<any>();
+  const [helloActor, setHelloActor] = useState<any>();
 
   async function handleConnectWallet() {
     try {
       // Add the Sonic mainnet canister to whitelist
       const sonicCanisterId = "3xwpq-ziaaa-aaaah-qcn4a-cai";
-      const whitelist = [sonicCanisterId];
+      const helloCanisterId = "rno2w-sqaaa-aaaaa-aaacq-cai";
+      const whitelist = [sonicCanisterId, helloCanisterId];
 
       // Create an interface factory from a canister's IDL
       const sonicPartialInterfaceFactory = ({ IDL }: any) => {
@@ -57,6 +59,21 @@ export default function ConnectButton({ handleOpenModal }: Props) {
         interfaceFactory: sonicPartialInterfaceFactory,
       });
 
+      // Create an interface factory from a canister's IDL
+      const helloPartialInterfaceFactory = ({ IDL }: any) => {
+        return IDL.Service({
+          get: IDL.Func([], [IDL.Nat], ["query"]),
+          greet: IDL.Func([IDL.Text], [IDL.Text], []),
+          inc: IDL.Func([], [], []),
+          set: IDL.Func([IDL.Nat], [], []),
+        });
+      };
+
+      const helloActor = await window.ic.plug.createActor({
+        canisterId: helloCanisterId,
+        interfaceFactory: helloPartialInterfaceFactory,
+      });
+
       // Request a connection
       // Will fire onConnectionUpdate on account switch
       await window?.ic?.plug?.requestConnect({
@@ -65,6 +82,7 @@ export default function ConnectButton({ handleOpenModal }: Props) {
 
       setCurrentPrincipalId((window as any).ic.plug.principalId);
       setActor(sonicActor);
+      setHelloActor(helloActor);
     } catch (e) {
       console.log(e);
     }
@@ -75,6 +93,22 @@ export default function ConnectButton({ handleOpenModal }: Props) {
     // use our actors getSwapInfo method
     const swapInfo = await actor.getSwapInfo();
     console.log("Sonic Swap Info: ", swapInfo);
+  };
+
+  const handleInc = async () => {
+    // use our actors getSwapInfo method
+    await helloActor.inc();
+  };
+
+  const handleSet = async () => {
+    // use our actors getSwapInfo method
+    await helloActor.set(10);
+  };
+
+  const handleGet = async () => {
+    // use our actors getSwapInfo method
+    const counter = await helloActor.get();
+    console.log("\x1b[36m%s\x1b[0m", "counter", counter);
   };
 
   return currentPrincipalId ? (
@@ -105,25 +139,93 @@ export default function ConnectButton({ handleOpenModal }: Props) {
         </Text>
         <Identicon />
       </Button>
-      <Button
-        onClick={handleGetSwapInfo}
-        bg="gray.800"
-        border="1px solid transparent"
-        _hover={{
-          border: "1px",
-          borderStyle: "solid",
-          borderColor: "blue.400",
-          backgroundColor: "gray.700",
-        }}
-        borderRadius="xl"
-        m="1px"
-        px={3}
-        height="38px"
-      >
-        <Text color="white" fontSize="md" fontWeight="medium" mr="2">
-          Handle get swap info
-        </Text>
-      </Button>
+
+      <UnorderedList>
+        <ListItem>
+          <Button
+            onClick={handleGetSwapInfo}
+            bg="gray.800"
+            border="1px solid transparent"
+            _hover={{
+              border: "1px",
+              borderStyle: "solid",
+              borderColor: "blue.400",
+              backgroundColor: "gray.700",
+            }}
+            borderRadius="xl"
+            m="1px"
+            px={3}
+            height="38px"
+          >
+            <Text color="white" fontSize="md" fontWeight="medium" mr="2">
+              Handle get swap info
+            </Text>
+          </Button>
+        </ListItem>
+        <ListItem>
+          <Button
+            onClick={handleGet}
+            bg="gray.800"
+            border="1px solid transparent"
+            _hover={{
+              border: "1px",
+              borderStyle: "solid",
+              borderColor: "blue.400",
+              backgroundColor: "gray.700",
+            }}
+            borderRadius="xl"
+            m="1px"
+            px={3}
+            height="38px"
+          >
+            <Text color="white" fontSize="md" fontWeight="medium" mr="2">
+              Handle get
+            </Text>
+          </Button>
+        </ListItem>
+        <ListItem>
+          <Button
+            onClick={handleInc}
+            bg="gray.800"
+            border="1px solid transparent"
+            _hover={{
+              border: "1px",
+              borderStyle: "solid",
+              borderColor: "blue.400",
+              backgroundColor: "gray.700",
+            }}
+            borderRadius="xl"
+            m="1px"
+            px={3}
+            height="38px"
+          >
+            <Text color="white" fontSize="md" fontWeight="medium" mr="2">
+              Handle inc
+            </Text>
+          </Button>
+        </ListItem>
+        <ListItem>
+          <Button
+            onClick={handleSet}
+            bg="gray.800"
+            border="1px solid transparent"
+            _hover={{
+              border: "1px",
+              borderStyle: "solid",
+              borderColor: "blue.400",
+              backgroundColor: "gray.700",
+            }}
+            borderRadius="xl"
+            m="1px"
+            px={3}
+            height="38px"
+          >
+            <Text color="white" fontSize="md" fontWeight="medium" mr="2">
+              Handle set 10
+            </Text>
+          </Button>
+        </ListItem>
+      </UnorderedList>
     </Box>
   ) : (
     <Button
