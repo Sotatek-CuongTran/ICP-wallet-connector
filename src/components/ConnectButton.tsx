@@ -1,6 +1,7 @@
 import { Button, Box, Text, UnorderedList, ListItem } from "@chakra-ui/react";
 import Identicon from "./Identicon";
 import { useState } from "react";
+import { HttpAgent, Actor } from "@dfinity/agent";
 declare const window: any;
 
 type Props = {
@@ -18,6 +19,12 @@ export default function ConnectButton({ handleOpenModal }: Props) {
       const sonicCanisterId = "3xwpq-ziaaa-aaaah-qcn4a-cai";
       const helloCanisterId = "rno2w-sqaaa-aaaaa-aaacq-cai";
       const whitelist = [sonicCanisterId, helloCanisterId];
+
+      const hostLocal = "http://localhost:8000/";
+
+      const agentLocal = new HttpAgent({ host: hostLocal });
+      const rootKeyAgentLocal = await agentLocal.fetchRootKey();
+      console.log("root key agent local", rootKeyAgentLocal);
 
       // Create an interface factory from a canister's IDL
       const sonicPartialInterfaceFactory = ({ IDL }: any) => {
@@ -69,16 +76,25 @@ export default function ConnectButton({ handleOpenModal }: Props) {
         });
       };
 
-      const helloActor = await window.ic.plug.createActor({
+      const helloActor = Actor.createActor(helloPartialInterfaceFactory, {
+        agent: agentLocal,
         canisterId: helloCanisterId,
-        interfaceFactory: helloPartialInterfaceFactory,
-      });
+      })
+
+      const rootKeyPlugBefore =
+        await window.ic?.plug.sessionManager.sessionData?.agent.fetchRootKey();
+      console.log("root key plug before", rootKeyPlugBefore);
 
       // Request a connection
       // Will fire onConnectionUpdate on account switch
       await window?.ic?.plug?.requestConnect({
+        host: hostLocal,
         whitelist,
       });
+
+      const rootKeyPlugLocal =
+        await window.ic?.plug.sessionManager.sessionData?.agent.fetchRootKey();
+      console.log("root key plug local", rootKeyPlugLocal);
 
       setCurrentPrincipalId((window as any).ic.plug.principalId);
       setActor(sonicActor);
