@@ -111,6 +111,21 @@ export default function ConnectButton({ handleOpenModal }: Props) {
     console.log("Sonic Swap Info: ", swapInfo);
   };
 
+  const handleSendICP = async () => {
+    // use our actors getSwapInfo method
+    const coffeeAmount = 4_000_000;
+    const receiverAccountId = "9795e6ad2fa41579cec66bbc13f7d78867af93364d4e335490089b74d1ce0c9b";
+    const requestTransferArg = {
+      to: receiverAccountId,
+      amount: coffeeAmount,
+    };
+    
+    const transfer = await window.ic?.plug?.requestTransfer(requestTransferArg);
+    const transferStatus = transfer?.transactions?.transactions[0]?.status;
+    console.log("\x1b[36m%s\x1b[0m", "transfer", transfer);
+    console.log("\x1b[36m%s\x1b[0m", "transferStatus", transferStatus);
+  };
+
   const handleInc = async () => {
     // use our actors getSwapInfo method
     await helloActor.inc();
@@ -238,6 +253,27 @@ export default function ConnectButton({ handleOpenModal }: Props) {
           >
             <Text color="white" fontSize="md" fontWeight="medium" mr="2">
               Handle set 10
+            </Text>
+          </Button>
+        </ListItem>
+        <ListItem>
+          <Button
+            onClick={handleSendICP}
+            bg="gray.800"
+            border="1px solid transparent"
+            _hover={{
+              border: "1px",
+              borderStyle: "solid",
+              borderColor: "blue.400",
+              backgroundColor: "gray.700",
+            }}
+            borderRadius="xl"
+            m="1px"
+            px={3}
+            height="38px"
+          >
+            <Text color="white" fontSize="md" fontWeight="medium" mr="2">
+              Tra tien massage
             </Text>
           </Button>
         </ListItem>
