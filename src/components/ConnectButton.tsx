@@ -60,11 +60,14 @@ export default function ConnectButton({ handleOpenModal }: Props) {
           getSwapInfo: IDL.Func([], [SwapInfo], ["query"]),
         });
       };
+      console.log("\x1b[36m%s\x1b[0m", "============================", );
 
-      const sonicActor = await window.ic.plug.createActor({
-        canisterId: sonicCanisterId,
-        interfaceFactory: sonicPartialInterfaceFactory,
-      });
+      // const sonicActor = await window.ic.infinityWallet.createActor({
+      //   canisterId: sonicCanisterId,
+      //   interfaceFactory: sonicPartialInterfaceFactory,
+      // });
+
+      console.log("\x1b[36m%s\x1b[0m", "============================", );
 
       // Create an interface factory from a canister's IDL
       const helloPartialInterfaceFactory = ({ IDL }: any) => {
@@ -81,24 +84,18 @@ export default function ConnectButton({ handleOpenModal }: Props) {
         canisterId: helloCanisterId,
       })
 
-      const rootKeyPlugBefore =
-        await window.ic?.plug.sessionManager.sessionData?.agent.fetchRootKey();
-      console.log("root key plug before", rootKeyPlugBefore);
-
       // Request a connection
       // Will fire onConnectionUpdate on account switch
-      await window?.ic?.plug?.requestConnect({
+      await window?.ic?.infinityWallet?.requestConnect({
         host: hostLocal,
         whitelist,
       });
 
-      const rootKeyPlugLocal =
-        await window.ic?.plug.sessionManager.sessionData?.agent.fetchRootKey();
-      console.log("root key plug local", rootKeyPlugLocal);
-
-      setCurrentPrincipalId((window as any).ic.plug.principalId);
-      setActor(sonicActor);
+      setCurrentPrincipalId("Cuong Pro");
+      // setActor(sonicActor);
       setHelloActor(helloActor);
+      console.log(helloActor);
+      
     } catch (e) {
       console.log(e);
     }
@@ -120,7 +117,7 @@ export default function ConnectButton({ handleOpenModal }: Props) {
       amount: coffeeAmount,
     };
     
-    const transfer = await window.ic?.plug?.requestTransfer(requestTransferArg);
+    const transfer = await window.ic?.infinityWallet?.requestTransfer(requestTransferArg);
     const transferStatus = transfer?.transactions?.transactions[0]?.status;
     console.log("\x1b[36m%s\x1b[0m", "transfer", transfer);
     console.log("\x1b[36m%s\x1b[0m", "transferStatus", transferStatus);
